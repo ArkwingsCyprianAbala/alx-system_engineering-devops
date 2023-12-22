@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# This script is displaying "Best School" 10 times
+# Display "Hi" before "Best School" on the 9th iteration
+
+MYCOUNT=0
+while [ $MYCOUNT -lt 10 ]
+do
+	if [ $MYCOUNT -eq 9 ]
+	then
+		echo "Hi"
+	fi
+        echo "Best School"
+        (( MYCOUNT++ ))
+done

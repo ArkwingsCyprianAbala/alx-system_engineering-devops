@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# loops from 1 to 10
+# Display badluck on the fourth iteration and goodluck on the eight
+
+MYCOUNT=0
+while [ $MYCOUNT -lt 10 ]
+do
+        if [ $MYCOUNT -eq 3 ]
+        then
+                echo "bad luck"
+	elif [ $MYCOUNT -eq 7 ]
+	then
+		echo "good luck"
+	else
+		echo "Best School"
+        fi
+        echo "Best School"
+        (( MYCOUNT++ ))
+done

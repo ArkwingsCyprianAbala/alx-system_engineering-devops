@@ -1,32 +1,45 @@
 #!/usr/bin/env bash
-# Create a script to install and configure HAProxy on lb-01 server
-# Configure HAProxy to send traffic to web-01 and web-02 servers
-# Distribute requests using a roundrobin algorithm
-# Make sure that HAProxy can be managed via an init script
-
-# Install and configure HAproxy on my lb-01 server.
-sudo apt-get -y update
-apt-get -y install haproxy
-
-# edit config file
-server_config=\
-"
-frontend  arkwingsabala_frontend
+# script for configuring HAProxy load balancer server
+MY_ID=496
+CONFIG_FILE=/etc/haproxy/haproxy.cfg
+INPUT_LINE="
+frontend arkwingsabala_frontend
         bind *:80
         mode http
         default_backend arkwingsabala_backend
+
 backend arkwingsabala_backend
         balance roundrobin
-        server 176572-web-01 52.206.73.2:80 check
-        server 176572-web-02 100.26.240.224:80 check
+        option forwardfor # ensure forwarded request includes cleint ip
+        server 496-web-01 35.243.204.105
+        server 496-web-02 35.190.182.239
 "
-echo "$server_config" | sudo tee -a /etc/haproxy/haproxy.cfg
 
-# enable haproxy to be started by init script
-echo "ENABLED=1" | sudo tee -a /etc/default/haproxy
+# check if hostname is correct
+if [[ $(hostname) =~ ^$MY_ID-lb-[0-9]+ ]]; then
+    echo 'hostname properly configured'
+else
+    >&2 echo 'hostname not configured properly...'
+    >&2 echo 'please set hostname to pattern: 496-lb-<server_id>...'
+    >&2 echo 'Example: sudo hostnamectl set-hostname 496-lb-<insert_server_id_here>'
+fi
 
-# Testing the HAproxy configuration file
-sudo haproxy -c -f /etc/haproxy/haproxy.cfg
+# check if HAProxy was previously configured
+if [ "$(grep -o "$INPUT_LINE" $CONFIG_FILE | wc -l)" != 0 ]; then
+	echo 'HAProxy already configured to script specs :)...'
+	# restart HAProxy
+	service haproxy restart
+else
+	# install HAProxy Version 1.8
+	apt-get -y install software-properties-common
+	add-apt-repository -y ppa:vbernat/haproxy-1.8
+	apt-get -y update
+	apt-get -y install haproxy=1.8.\*
 
-# Restart the Nginx service
-sudo service haproxy restart
+	# configure HAProxyd
+
+	printf "%s" "$INPUT_LINE" >> $CONFIG_FILE
+
+	# start HAProxy
+	service haproxy start
+fi

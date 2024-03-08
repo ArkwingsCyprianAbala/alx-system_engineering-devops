@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# configures a server to listening on port 80 of all servers active IPv4 IPs
-
-sudo sed -i "s/8080/80/" /etc/nginx/sites-enabled/default
-sudo service nginx restart
-echo "" | sudo dd status=none of=/run/nginx.pid
+# script to fix nginx server that won't shut off via daemon manager
+mv /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+cp /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default 
+service nginx start
 
